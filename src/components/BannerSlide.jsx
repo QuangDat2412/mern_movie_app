@@ -17,7 +17,7 @@ const BannerSlide = (props) => {
         slidesToShow: 1,
         slidesToScroll: 1,
         autoplaySpeed: 5000,
-        autoPlay: true,
+        autoplay: true,
     };
 
     return (
