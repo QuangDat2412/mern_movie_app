@@ -775,10 +775,12 @@ const PaperContent = styled.div`
         box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
         background-color: #e2dbdb;
     }
-    & > span {
-        display: block;
-        color: red;
-        font-size: 0.8rem;
+    & > form {
+        & > span {
+            display: block;
+            color: red;
+            font-size: 0.8rem;
+        }
     }
     .title {
         p {
