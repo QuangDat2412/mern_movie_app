@@ -23,7 +23,7 @@ const VideoBox = (props) => {
     const dispatch = useDispatch();
     const [start, setStart] = useState(false);
     const [ads, setAds] = useState(false);
-    const [p, setP] = useState('720p');
+    const [p, setP] = useState('360p');
     const [play, setPlay] = useState(false);
     const [mute, setMute] = useState(false);
     const [left, setLeft] = useState(0);
