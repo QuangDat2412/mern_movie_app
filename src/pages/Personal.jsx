@@ -39,8 +39,8 @@ const Personal = () => {
             <Container>
                 <div>
                     <div>
-                        <img src={auth?.img ? auth.img : 'nguoi dung'} alt="" />
-                        <span>{auth?.fullName ? auth.fullName : 'nguoi dung'}</span>
+                        <img src={auth?.img ? auth.img : 'https://www.interlinecenter.com/wp-content/uploads/2016/10/dummy-user-img.png'} alt="" />
+                        <span>{auth?.fullName ? auth.fullName : 'Tên người dùng'}</span>
                     </div>
                     <div>
                         <Link to="/personal/history" style={{ color: `${slug === 'history' ? 'var(--primary-color)' : ''}` }}>
@@ -85,7 +85,7 @@ const Setting = (props) => {
                 <div className="line"></div>
                 <div className="portrait">
                     <div>
-                        <img src={auth?.img ? auth.img : 'nguoi dung'} alt="" />
+                        <img src={auth?.img ? auth.img : 'https://www.interlinecenter.com/wp-content/uploads/2016/10/dummy-user-img.png'} alt="" />
                     </div>
                     <div>
                         <div>{auth?.fullName}</div>

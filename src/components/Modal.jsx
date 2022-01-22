@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, memo, useCallback, useRef, useEffect } from 'react';
+import { useState, memo, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import { login, register } from '../redux/authRedux/apiCalls';
 import { useDispatch } from 'react-redux';
@@ -151,33 +151,25 @@ const Login = (props) => {
         status,
         setStatus,
     } = props;
-    useEffect(() => {
-        const logKey = (e) => {
-            const keyCode = e.keyCode;
-            if (keyCode === 13) {
-                handleLogin();
-            }
-            // code block
-        };
-        document.addEventListener('keyup', logKey);
-        return () => {
-            document.removeEventListener('keyup', logKey);
-        };
-    }, [inputs]);
+
     const handleLogin = () => {
         const data = {
             ...inputs,
         };
         setLoader(true);
         validate(data);
-        login(dispatch, data).then((response) => {
-            if (response._id) {
-                closeModal();
-            } else {
-                setStatus('Tài khoản mật khẩu không chính xác !!!');
-            }
+        if (regEmail.test(data.email) && data.email !== '' && regPassword.test(data.password)) {
+            login(dispatch, data).then((response) => {
+                if (response._id) {
+                    closeModal();
+                } else {
+                    setStatus('Tài khoản mật khẩu không chính xác !!!');
+                }
+                setLoader(false);
+            });
+        } else {
             setLoader(false);
-        });
+        }
     };
     return (
         <>
@@ -275,21 +267,6 @@ const Register = (props) => {
         setStatus,
     } = props;
 
-    useEffect(() => {
-        const logKey = (e) => {
-            const keyCode = e.keyCode;
-            if (keyCode === 13) {
-                handleRegister();
-            }
-            // code block
-        };
-        document.addEventListener('keyup', logKey);
-        return () => {
-            document.removeEventListener('keyup', logKey);
-            setLoader();
-            setStep();
-        };
-    }, []);
     const [loader, setLoader] = useState(false);
     const [step, setStep] = useState(1);
     const countRef = useRef(null);
@@ -323,6 +300,7 @@ const Register = (props) => {
             case 1:
                 if (regEmail.test(data.email) && data.email !== '' && regPassword.test(data.password) && data.password === data.rePassword) {
                     publicRequest.post('/auth/sendmail/register', data).then((res) => {
+                        console.log(res);
                         if (res.data) {
                             setStep(2);
                             countRef.current = setInterval(() => {
@@ -479,7 +457,6 @@ const ForgotPassword = (props) => {
         email,
         password,
         rePassword,
-        regPassword,
         inputs,
         setStatus,
     } = props;
@@ -505,21 +482,7 @@ const ForgotPassword = (props) => {
             }
         });
     };
-    useEffect(() => {
-        const logKey = (e) => {
-            const keyCode = e.keyCode;
-            if (keyCode === 13) {
-                handleForgotPassword();
-            }
-            // code block
-        };
-        document.addEventListener('keyup', logKey);
-        return () => {
-            document.removeEventListener('keyup', logKey);
-            setLoader();
-            setStep();
-        };
-    }, []);
+
     const handleForgotPassword = (e) => {
         const data = {
             ...inputs,
