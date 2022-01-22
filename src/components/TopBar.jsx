@@ -295,7 +295,7 @@ const TopBar = (props) => {
                                 </UserBox>
                                 {auth?._id ? (
                                     <>
-                                        {auth?.isVip && (
+                                        {!auth?.isVip && (
                                             <Logo>
                                                 <Stripe>
                                                     <div>
