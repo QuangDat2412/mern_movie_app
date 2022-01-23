@@ -215,7 +215,7 @@ const Container = styled.div`
                         display: inline-block;
                     }
                 }
-                & > div:nth-child(6) {
+                & > div:last-child {
                     display: none;
                 }
             }
