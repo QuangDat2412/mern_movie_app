@@ -16,10 +16,11 @@ import AddVip from '../components/AddVip';
 const Detail = (props) => {
     const { setOpenModal } = props;
     const { slug } = useParams();
+    const dispatch = useDispatch();
     useEffect(() => {
         getMovies(dispatch);
         window.scrollTo(0, 0);
-    }, [slug]);
+    }, [slug, dispatch]);
     const movies = useSelector((state) => {
         return state.movie?.movies;
     });
@@ -27,7 +28,6 @@ const Detail = (props) => {
     const auth = useSelector((state) => {
         return state.auth.currentUser;
     });
-    const dispatch = useDispatch();
 
     const [tabWrapper, setTabWrapper] = useState('1');
 
