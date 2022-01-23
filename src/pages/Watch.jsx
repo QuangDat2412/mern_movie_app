@@ -15,7 +15,8 @@ const Watch = (props) => {
     useEffect(() => {
         getMovies(dispatch);
         window.scrollTo(0, 0);
-    }, [slug]);
+    }, [slug, dispatch]);
+
     const arr = slug.split('-');
     Object.keys(arr).map((x) => {
         return (arr[x] = arr[x].trim());
@@ -42,7 +43,7 @@ const Watch = (props) => {
         return state.movie.movies;
     });
     const movie = movies.find((movie) => movie?.slug === newSlug);
-    const episodes = movie?.episodes;
+    const episodes = movie?.episodes || [];
     let episode;
     if (movie?.isSeries) {
         episode = episodes.find((episode) => `${episode.episode}` === arr[arr.length - 2]);

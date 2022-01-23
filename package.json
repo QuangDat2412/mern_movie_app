@@ -52,5 +52,5 @@
             "last 1 safari version"
         ]
     },
-    "proxy": "http://localhost:2412/api/"
+    "proxy": "https://server-web-movie.herokuapp.com/api/"
 }
