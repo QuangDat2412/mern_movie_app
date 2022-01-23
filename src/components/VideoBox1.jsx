@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, memo } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { publicRequest, userRequest } from '../requestMethods';
-import ReactHlsPlayer from 'react-hls-player';
 import { updateUserSuccess } from '../redux/authRedux/authRedux';
 import { useDispatch } from 'react-redux';
 import Stripe from './Stripe';
@@ -18,15 +17,18 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
+import Loader from './Loader';
 const VideoBox = (props) => {
     const slug = useParams();
     const dispatch = useDispatch();
     const [start, setStart] = useState(false);
-    const [play, setPlay] = useState(false);
+    const [ads, setAds] = useState(false);
     const [p, setP] = useState('360p');
-    const [file, setFile] = useState(null);
+    const [play, setPlay] = useState(false);
     const [mute, setMute] = useState(false);
     const [left, setLeft] = useState(0);
+    const [file, setFile] = useState(null);
+    const [link, setLink] = useState(null);
     const [currentTime, setCurrentTime] = useState(0);
     const [vol, setVol] = useState(50);
     const [overTime, setOverTime] = useState(0);
@@ -35,10 +37,19 @@ const VideoBox = (props) => {
     const volume = useRef();
     const timeId = useRef();
     const fullScreen = useRef(false);
+    const controller = new AbortController();
+    const { signal } = controller;
     const getEpisode = async (p) => {
         try {
             const res = await publicRequest.get('/episodes/episode/' + props.episode._id);
-            setFile(res.data[p]);
+            const result = await fetch(
+                'https://www.googleapis.com/drive/v3/files/' + res.data[p] + '?alt=media&key=AIzaSyCIa8iyfyYCpCEvjxuYZyfCJ6SGHmEAsxo',
+                { signal }
+            );
+            // const result = await fetch('http://localhost:3000/test.mp4', { signal });
+            const blob = await result.blob();
+            setLink(URL.createObjectURL(blob));
+            setFile('/ads.mp4');
         } catch (err) {
             setP('480p');
             console.log(err);
@@ -47,8 +58,12 @@ const VideoBox = (props) => {
     useEffect(() => {
         pauseVideo();
         setStart(false);
+        setAds(false);
         setFile(null);
         getEpisode(p);
+        return () => {
+            controller.abort();
+        };
     }, [slug, p]);
     useEffect(() => {
         video.current.ontimeupdate = () => {
@@ -58,6 +73,9 @@ const VideoBox = (props) => {
                     progress.current.value = progressPercent;
                 }
                 setCurrentTime(formatTime(video.current.currentTime));
+            }
+            if (!ads) {
+                setCurrentTime(formatTime(parseInt(video.current.duration.toFixed(0)) - video.current.currentTime));
             }
         };
         const logKey = (e) => {
@@ -103,7 +121,7 @@ const VideoBox = (props) => {
         return () => {
             document.removeEventListener('keyup', logKey);
         };
-    }, []);
+    }, [ads]);
     const timeLapse = (e) => {
         // từ số phần trăm của giây convert sang giây
         video.current.currentTime = overTime;
@@ -179,7 +197,17 @@ const VideoBox = (props) => {
     };
     const handlePlayMovie = async () => {
         setStart(true);
-
+        const time = parseInt((video.current.duration * 1000).toFixed(0));
+        if (props.auth?.isVip) {
+            await setFile(link);
+            setAds(true);
+        } else {
+            setTimeout(() => {
+                setFile(link);
+                playVideo();
+                setAds(true);
+            }, time);
+        }
         playVideo();
         if (props.auth?._id) {
             const res = await userRequest.put(`/users/add/${props.auth?._id}`, { history: props.episode._id });
@@ -209,7 +237,7 @@ const VideoBox = (props) => {
                             backgroundImage: `url(${start ? 'https://www.iqiyipic.com/lequ/20211125/player-back.png' : props.movie?.imgBanner})`,
                         }}
                     >
-                        {!start && (
+                        {!start && file && (
                             <>
                                 {props.auth?.isVip || !props.movie?.isVip || (props.episode?.episode <= 4 && props.movie?.isSeries) ? (
                                     <PlayCircleOutlineIcon onClick={handlePlayMovie} />
@@ -235,20 +263,24 @@ const VideoBox = (props) => {
                                 )}
                             </>
                         )}
+                        {!file && <Loader />}
                     </div>
                     <div>
-                        <ReactHlsPlayer
-                            playerRef={video}
+                        <video
+                            ref={video}
                             src={file}
                             onClick={() => {
-                                if (video.current.paused === false) {
+                                if (play) {
                                     pauseVideo();
                                 } else {
                                     playVideo();
                                 }
                             }}
                         />
-                        {start && (
+                        {/* <source  type="video/mp4" />
+                        </video> */}
+                        {start && !ads && <div className="ads">{`Quảng cáo 1 trong tổng số 1 (${currentTime ? currentTime : '00:00'})`}</div>}
+                        {start && ads && (
                             <ControlVideo id="control">
                                 <div>
                                     <input
@@ -348,6 +380,7 @@ const VideoBox = (props) => {
                                 </div>
                             </ControlVideo>
                         )}
+                        {!file && <Loader />}
                     </div>
                 </div>
             </div>
@@ -558,6 +591,7 @@ const ControlVideo = styled.div`
             padding: 5px;
             font-size: 0.8rem;
             border-radius: 5px;
+            width: 60px;
             text-align: center;
             vertical-align: middle;
         }
